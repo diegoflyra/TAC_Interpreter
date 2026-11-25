@@ -5,7 +5,6 @@ use crate::instrucao::Instrucao;
 use crate::instrucao::Op;
 use crate::instrucao::Operando;
 use crate::maquina::Maquina;
-use crate::maquina::Quadro;
 use crate::programa::Programa;
 
 fn programa_soma() -> Vec<Instrucao> {
@@ -59,32 +58,35 @@ fn programa_soma() -> Vec<Instrucao> {
     ];
 }
 
-fn mostrar_indices(p: &Programa) {
-    for (nome, pos) in &p.tabela {
-        println!("{}: {}", nome, pos);
-    }
+// main:
+//     a = 5
+//     b = 10
+//     c = a + b
+fn programa_reto() -> Vec<Instrucao> {
+    vec![
+        Instrucao::Rotulo {
+            nome: "main".to_string(),
+        },
+        Instrucao::Copia {
+            destino: "a".to_string(),
+            fonte: Operando::Constante(5),
+        },
+        Instrucao::Copia {
+            destino: "b".to_string(),
+            fonte: Operando::Constante(10),
+        },
+        Instrucao::Binaria {
+            destino: "c".to_string(),
+            esquerda: Operando::Nome("a".to_string()),
+            op: Op::Add,
+            direita: Operando::Nome("b".to_string()),
+        },
+    ]
 }
 
 fn main() {
-    let programa = programa_soma();
-    println!("{}", programa.len());
-
-    let p = Programa::montar(programa_soma());
-
-    mostrar_indices(&p);
-
-    let m = Maquina::montar(p.inicio);
-    println!("{}", m.pc); // deve imprimir 5
-    println!("{}", m.pilha.len()); // deve imprimir 1
-
-    println!("{}", m.get_valor(&Operando::Constante(7))); // 7
-
+    let p = Programa::montar(programa_reto());
     let mut m = Maquina::montar(p.inicio);
-    m.pilha[0].variaveis.insert("x".to_string(), 42);
-    println!("{}", m.get_valor(&Operando::Nome("x".to_string()))); // 42
-
-    println!("{}", Maquina::efetuar(&Op::Add, 3, 4)); // 7
-    println!("{}", Maquina::efetuar(&Op::Mul, 3, 4)); // 12
-    println!("{}", Maquina::efetuar(&Op::Sub, 3, 10)); // -7
-    println!("{}", Maquina::efetuar(&Op::Div, 8, 2)); // 4
+    m.rodar(&p);
+    m.mostrar();
 }

@@ -1,5 +1,7 @@
 use crate::instrucao::Op;
 use crate::instrucao::Operando;
+use crate::instrucao::Instrucao;
+use crate::programa::Programa;
 
 use std::{collections::HashMap, hash::Hash};
 pub struct Quadro {
@@ -39,9 +41,8 @@ impl Maquina {
     }
 
     pub fn efetuar(op: &Op, a: i64, b: i64) -> i64 {
-        if b == 0 {
-            panic!("Divisão por 0!")
-        }
+
+        
 
         match op {
             Op::Add => return a + b,
@@ -54,6 +55,56 @@ impl Maquina {
                     return a / b;
                 }
             }
+        }
+    }
+
+
+    pub fn rodar (&mut self, p: &Programa) {
+
+        while self.pc < p.instrucoes.len() {
+            
+            match &p.instrucoes[self.pc] {
+                Instrucao::Rotulo { .. } => {},
+                Instrucao::Copia { destino, fonte } => {
+
+                    let valor = self.get_valor(fonte);
+
+                    match self.pilha.last_mut(){
+
+                        Some(q) => {q.variaveis.insert(destino.clone(), valor);},
+                        None => panic!("Pilha vazia"),
+                    }
+
+                },
+                Instrucao::Binaria { destino, esquerda, op, direita } => {
+                    let valor = Maquina::efetuar(op, self.get_valor(esquerda), self.get_valor(direita));
+
+                    match self.pilha.last_mut(){
+
+                    Some(q) => {q.variaveis.insert(destino.clone(), valor);},
+                    None => panic!("Pilha vazia"),
+                }
+                },
+                _ => {}
+
+                
+            }
+
+
+            self.pc += 1;
+        }
+    }
+
+    pub fn mostrar(&self) {
+        match self.pilha.last() {
+
+            Some(q) => {
+                for (nome, valor) in &q.variaveis {
+                    println!("{}: {}", nome, valor);
+                }
+            },
+            None => panic!("pilha vazia!")
+
         }
     }
 }

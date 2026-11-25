@@ -25,9 +25,10 @@ Só `Rotulo`, `Copia` e `Binaria`. As outras variantes dão `panic!("ainda não"
 - [x] 3.1 `Quadro`, `Maquina` e `Maquina::montar` (pilha nasce com um quadro)
 - [x] 3.2 `get_valor`: `Operando` vira `i64`
 - [x] 3.3 `efetuar`: aplica um `Op` (divisão por zero só dentro do `Div`)
-- [>] 3.4 `rodar`: ciclo com `while` e `match` das instruções
-- [ ] 3.5 `mostrar`: imprime as variáveis do quadro
-- [ ] 3.6 teste final: `programa_reto` termina com `a=5`, `b=10`, `c=15`
+- [x] 3.4 `rodar`: ciclo com `while` e `match` das instruções
+- [x] 3.5 `mostrar`: imprime as variáveis do quadro
+- [x] 3.7 limpeza: `main` fica só com montar, criar máquina, `rodar` e `mostrar` (apagar `mostrar_indices` e os testes temporários)
+- [x] 3.6 teste final: `programa_reto` termina com `a=5`, `b=10`, `c=15`
 
 ## Etapa 4 · Saltos — falta
 
