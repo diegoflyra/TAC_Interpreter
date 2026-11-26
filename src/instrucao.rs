@@ -1,9 +1,11 @@
+#[derive(Debug, PartialEq, Clone)]
 pub enum Operando {
     Nome(String),
     Constante(i64),
     Parametro(usize),
 }
 
+#[derive(Debug, PartialEq, Clone)]
 pub enum Op {
     Add,
     Sub,
@@ -11,6 +13,7 @@ pub enum Op {
     Div,
 }
 
+#[derive(Debug, PartialEq, Clone)]
 pub enum Instrucao {
     Rotulo {
         nome: String,

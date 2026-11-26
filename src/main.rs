@@ -1,6 +1,10 @@
 mod instrucao;
 mod maquina;
 mod programa;
+mod lexer;
+mod leitor;
+#[cfg(test)]
+mod testes;
 use crate::instrucao::Instrucao;
 use crate::instrucao::Op;
 use crate::instrucao::Operando;
