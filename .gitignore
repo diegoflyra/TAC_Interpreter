@@ -1,1 +1,14 @@
-/target
+# Só entra no repositório o que o interpretador precisa para compilar e rodar.
+# A regra é ignorar tudo e liberar arquivo por arquivo com "!".
+
+*
+
+!.gitignore
+!Cargo.toml
+!Cargo.lock
+
+!src/
+!src/*.rs
+
+# os testes ficam só na máquina local
+src/testes.rs

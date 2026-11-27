@@ -35,33 +35,46 @@ pub fn operador(v: &Variante) -> Op {
 
     }
 }
-
-pub fn ler_linha (fichas: &[Variante]) -> Instrucao {
+pub const TEMP_NEG: &str = "string desnecessariamente grande que serve de destino aleatorio e que eu imagino que ninguem vai usar esse nome pra guardar nada";
+pub fn ler_linha (fichas: &[Variante]) -> Vec<Instrucao> {
 
     match fichas {
         [Variante::Identificador(nome), Variante::DoisPontos] =>
-            Instrucao::Rotulo { nome: nome.clone() },
+            vec![Instrucao::Rotulo { nome: nome.clone() }],
     
         [Variante::Goto, Variante::Identificador(rotulo)] =>
-            Instrucao::Goto { rotulo: rotulo.clone() },
+            vec![Instrucao::Goto { rotulo: rotulo.clone() }],
     
 
         [Variante::Identificador(destino), Variante::Igual, fonte] =>
-            Instrucao::Copia { destino: destino.clone(), fonte: operando(fonte) },
+            vec![Instrucao::Copia { destino: destino.clone(), fonte: operando(fonte) }],
+
+        [Variante::Identificador(destino), Variante::Igual, Variante::Menos, fonte] =>
+            vec![Instrucao::Binaria { destino: (destino.clone()), esquerda: (Operando::Constante(0)), op: (Op::Sub), direita: (operando(fonte)) }],
 
         [Variante::If, condicao, Variante::Goto, Variante::Identificador(rotulo)] =>
-            Instrucao::If { condicao: operando(condicao), rotulo: (rotulo.clone()) },
+            vec![Instrucao::If { condicao: operando(condicao), rotulo: (rotulo.clone()) }],
 
         [Variante::IfFalse, condicao, Variante::Goto, Variante::Identificador(rotulo)] =>
-            Instrucao::IfFalse { condicao: operando(condicao), rotulo: (rotulo.clone()) },
-        [Variante::Param, n] => Instrucao::Param { fonte: operando(n) },
-        [Variante::Return, x] => Instrucao::Return { valor: operando(x) },
+            vec![Instrucao::IfFalse { condicao: operando(condicao), rotulo: (rotulo.clone()) }],
+        [Variante::Param, n] => vec![Instrucao::Param { fonte: operando(n) }],
+        [Variante::Param, Variante::Menos, n] => 
+            vec![Instrucao::Binaria { destino: TEMP_NEG.to_string(), esquerda: (Operando::Constante(0)), op: (Op::Sub), direita: (operando(n)) }, Instrucao::Param { fonte: Operando::Nome(TEMP_NEG.to_string()) }],
+        [Variante::Return, x] => vec![Instrucao::Return { valor: operando(x) }],
+        [Variante::Return, Variante::Menos, x] => 
+            vec![Instrucao::Binaria { destino: (TEMP_NEG.to_string()), esquerda: (Operando::Constante(0)), op: (Op::Sub), direita: (operando(x)) }, Instrucao::Return { valor: Operando::Nome(TEMP_NEG.to_string()) }],
         [Variante::Call, Variante::Identificador(f), Variante::Virgula, Variante::Numero(n)] =>
-            Instrucao::Call { destino: None, funcao: f.clone(), n: (*n as usize) },
+            vec![Instrucao::Call { destino: None, funcao: f.clone(), n: (*n as usize) }],
         [Variante::Identificador(t), Variante::Igual, x, op, y] =>
-            Instrucao::Binaria { destino: t.clone(), esquerda: operando(x), op: operador(op), direita: operando(y)},
+            vec![Instrucao::Binaria { destino: t.clone(), esquerda: operando(x), op: operador(op), direita: operando(y)}],
+        [Variante::Identificador(t), Variante::Igual, Variante::Menos, x, op, y] =>
+            vec![Instrucao::Binaria { destino: (TEMP_NEG.to_string()), esquerda: (Operando::Constante(0)), op: (Op::Sub), direita: (operando(x)) }, Instrucao::Binaria { destino: t.clone(), esquerda: Operando::Nome(TEMP_NEG.to_string()), op: operador(op), direita: operando(y)}],
+        [Variante::Identificador(t), Variante::Igual, x, op, Variante::Menos, y] =>
+            vec![Instrucao::Binaria { destino: (TEMP_NEG.to_string()), esquerda: (Operando::Constante(0)), op: (Op::Sub), direita: (operando(y)) }, Instrucao::Binaria { destino: t.clone(), esquerda: operando(x), op: operador(op), direita: Operando::Nome(TEMP_NEG.to_string())}],
+
         [Variante::Identificador(t), Variante::Igual, Variante::Call, Variante::Identificador(f), Variante::Virgula, Variante::Numero(n)] => 
-            Instrucao::Call { destino: Some(t.clone()), funcao: (f.clone()), n: (*n as usize) },
+            vec![Instrucao::Call { destino: Some(t.clone()), funcao: (f.clone()), n: (*n as usize) }],
+            
 
 
     
@@ -125,7 +138,7 @@ pub fn ler_programa(texto: &str) -> Vec<Instrucao> {
     let mut instrucoes: Vec<Instrucao> = vec![];
 
     for grupo in grupos {
-        instrucoes.push(ler_linha(&grupo));
+        instrucoes.extend(ler_linha(&grupo));
     }
 
     return instrucoes;

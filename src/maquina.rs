@@ -2,6 +2,7 @@ use crate::instrucao::Op;
 use crate::instrucao::Operando;
 use crate::instrucao::Instrucao;
 use crate::programa::Programa;
+use crate::leitor::TEMP_NEG;
 
 use std::{collections::HashMap, hash::Hash};
 pub struct Quadro {
@@ -149,6 +150,12 @@ impl Maquina {
                 Instrucao::Return { valor } => {
 
                     let v = self.get_valor(valor);
+
+                    if self.pilha.len() == 1 {
+                        self.pc = p.instrucoes.len(); 
+                        continue;
+                    }
+
                     let o = self.pilha.pop();
 
                     if self.pilha.is_empty() {
@@ -180,16 +187,27 @@ impl Maquina {
         }
     }
 
+    // uma linha "nome: valor" por variável do quadro atual, em ordem alfabética,
+    // sem o temporário que o leitor cria para o menos unário
+    pub fn ambiente(&self) -> Vec<String> {
+        let quadro = self.pilha.last().expect("pilha vazia!");
+
+        let mut variaveis: Vec<(&String, &i64)> = quadro
+            .variaveis
+            .iter()
+            .filter(|(nome, _)| nome.as_str() != TEMP_NEG)
+            .collect();
+        variaveis.sort();
+
+        variaveis
+            .iter()
+            .map(|(nome, valor)| format!("{}: {}", nome, valor))
+            .collect()
+    }
+
     pub fn mostrar(&self) {
-        match self.pilha.last() {
-
-            Some(q) => {
-                for (nome, valor) in &q.variaveis {
-                    println!("{}: {}", nome, valor);
-                }
-            },
-            None => panic!("pilha vazia!")
-
+        for linha in self.ambiente() {
+            println!("{}", linha);
         }
     }
 }
